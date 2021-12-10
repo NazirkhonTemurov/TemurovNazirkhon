@@ -1,62 +1,175 @@
-/******************************
-* Автор:    Темуров Н.        *
-* Дата:     01.11.2021        *
-* Название: Работа с файлами  *
-* *****************************/
-
+/********************************
+*Автор:  Темуров Назирхон       *
+*дата:    12.11.21              *
+*Название:Частота повторений    *
+********************************/
+#include <string>
 #include <iostream>
-#include <cmath>
-#include <iomanip>
 #include <fstream>
+#include <filesystem>
+#include <cstring>
+#include <vector>
 
 using namespace std;
 
-int main() {
+//Структура для однобуквенных
+struct withOneLetterValue {
+  char letterName;
+  int intLetter;
+};
+vector < withOneLetterValue > arrayWithOneLetter;
 
-  setlocale(LC_ALL, "ru");
+//Структура для двухбуквенных
+struct withTwoLetterValue {
+  string letterName;
+  int intLetter;
+};
 
-  string path = "wine.txt";
+vector < withTwoLetterValue > arrayWithTwoLetter;
 
-  ofstream wineVault;
-  wineVault.open(path,ifstream::app);//ofstream::app после удаление данных текст остаётся
+// Преобразование прописных букв в строчные
+string toLowerText(string text) {
+  char character;
+  int letter = 0;
 
-  if (!wineVault.is_open()) {
-    cout << "Ошибка открытия файла!" << endl;
-  } else {
-    wineVault << "\n Cреднее стоимость вина в погребе 1500$";
+  ofstream createProcessingFile("toLowerText.txt");
+
+  while (text[letter]) { // пока не конец строки
+    character = text[letter];
+    createProcessingFile << (char) tolower(character); // преоброзование прописных букв в строчные
+    ++letter; // инкремент индекса символов в строке
   }
 
-  wineVault.close();
+  createProcessingFile.close();
 
-  ifstream vault;
-  vault.open(path);
+  ifstream openProcessingFile("toLowerText.txt");
+  string processingText;
+  getline(openProcessingFile, processingText);
+  
+  openProcessingFile.close();
 
-  if (!vault.is_open()) {
-    cout << "ошибка окрытия файла" << endl;
-  } else {
-    cout << "\n Файл открыт!" << endl;
-    char ch;
-    while (vault.get(ch)) {
-      cout << ch;
+  return processingText;
+
+}
+
+// подсчитываем количество символов в тексте, без пробелов
+int iTextLength(string str) {
+  const char * stringArray = str.c_str();
+  int strLength = strlen(stringArray);
+  int spaces = 0;
+  for (int arrayIndex = 0; stringArray[arrayIndex]; ++arrayIndex) {
+    if (stringArray[arrayIndex] == ' ') { 
+      ++spaces;
     }
   }
-/*
-int n;
-int a=2000,b=3000,c=300,d=1500,i=250,f=1770;
 
-fstream vault ("wine.txt");
-int a,b,c,d,i,f,sum=0;
-int n=0;
-while(vault>>x)
-{
-   sum+=x;
-   n++;
+  int character = strLength - spaces;
+  return character;
 }
-cout<<sum/n;
-*/
 
-  vault.close();
+//обработка однобуквенных значение
+void VSingleLetter(const char * convertToChar, int textSize) {
 
+  for (int oneLetterindex = 0; oneLetterindex < arrayWithOneLetter.size(); ++oneLetterindex) {
+    arrayWithOneLetter[oneLetterindex].intLetter = 0;
+  };
+
+  for (int charIndex = 0; convertToChar[charIndex]; ++charIndex) {
+    if (convertToChar[charIndex] != ' ') {
+      char one = convertToChar[charIndex];
+      arrayWithOneLetter.push_back(withOneLetterValue());
+
+      for (int indexOfOneLetterArr = 0; indexOfOneLetterArr < arrayWithOneLetter.size(); ++indexOfOneLetterArr) {
+        if (arrayWithOneLetter[indexOfOneLetterArr].intLetter > 0) {
+          if (arrayWithOneLetter[indexOfOneLetterArr].letterName == one) {
+            int countLetterCopy = arrayWithOneLetter[indexOfOneLetterArr].intLetter;
+            arrayWithOneLetter[indexOfOneLetterArr].intLetter = countLetterCopy + 1;
+            break;
+          }
+        } else if (arrayWithOneLetter[indexOfOneLetterArr].intLetter == 0) {
+          arrayWithOneLetter[indexOfOneLetterArr].letterName = one;
+          arrayWithOneLetter[indexOfOneLetterArr].intLetter = 1;
+          break;
+        }
+      }
+    }
+  }
+
+}
+
+//обработка двухбуквенных значение
+void VTwoLetter(const char * convertToChar, int textSize) {
+
+  for (int charIndex = 0; convertToChar[charIndex]; ++charIndex) {
+    if (convertToChar[charIndex] != ' ' && convertToChar[charIndex + 1] != ' ') {
+      char two[2] = {
+        convertToChar[charIndex],
+        convertToChar[charIndex + 1]
+      };
+
+      arrayWithTwoLetter.push_back(withTwoLetterValue());
+
+      for (int indexOfTwoLetterArr = 1; indexOfTwoLetterArr < arrayWithTwoLetter.size(); ++indexOfTwoLetterArr) {
+        if (arrayWithTwoLetter[indexOfTwoLetterArr].letterName != "" && arrayWithTwoLetter[indexOfTwoLetterArr].intLetter > 0) {
+          if (arrayWithTwoLetter[indexOfTwoLetterArr].letterName == string(two)) {
+            int countLetterCopy = arrayWithTwoLetter[indexOfTwoLetterArr].intLetter;
+            arrayWithTwoLetter[indexOfTwoLetterArr].intLetter = countLetterCopy + 1;
+            break;
+          }
+        } else if (arrayWithTwoLetter[indexOfTwoLetterArr].letterName == "" && arrayWithTwoLetter[indexOfTwoLetterArr].intLetter == 0) {
+          int countLetterCopy = arrayWithTwoLetter[indexOfTwoLetterArr].intLetter;
+          arrayWithTwoLetter[indexOfTwoLetterArr].letterName = string(two);
+          arrayWithTwoLetter[indexOfTwoLetterArr].intLetter = countLetterCopy + 1;
+          break;
+        }
+      }
+    }
+  }
+}
+
+// вывод частота повторения однобуквенного значения
+void printSingleLetter() {
+  cout << "Частота повторения однобуквенного значения: " << endl;
+
+  for (int oneLetterindex = 0; oneLetterindex < arrayWithOneLetter.size(); ++oneLetterindex) {
+    if (arrayWithOneLetter[oneLetterindex].intLetter != 0 && arrayWithOneLetter[oneLetterindex].intLetter > 1) {
+      cout << "\"" << arrayWithOneLetter[oneLetterindex].letterName << "\"" << " = " << arrayWithOneLetter[oneLetterindex].intLetter << "; ";
+    }
+  }
+}
+
+//выыод частоту повторение двухбуквенных значение
+void printTwoLetter() {
+  cout << endl << "Частоту повторение двухбуквенных значение: " << endl;
+  for (int twoLetterIndex = 0; twoLetterIndex < arrayWithTwoLetter.size(); ++twoLetterIndex) {
+    if (arrayWithTwoLetter[twoLetterIndex].letterName != "" && arrayWithTwoLetter[twoLetterIndex].intLetter > 1) {
+      cout << "\"" << arrayWithTwoLetter[twoLetterIndex].letterName << "\"" << " = " << arrayWithTwoLetter[twoLetterIndex].intLetter << "; ";
+    }
+  }
+}
+
+int main() {
+
+  setlocale(LC_ALL, "rus");
+
+  ofstream InformationFile("information.txt");
+  InformationFile << "Lorem ipsum dolor sit amet, consectetur adipiscing elit&*99r8343989998989834837AAjjd";
+  InformationFile.close();
+
+  ifstream OpenInformationFile("information.txt");
+  string str;
+  getline(OpenInformationFile, str);
+  cout << str << endl << endl;
+
+  string text = toLowerText(str); // Преобразование прописных букв в строчные
+  const char * convertToChar = text.c_str();
+
+  VSingleLetter(convertToChar, iTextLength(str)); //обработка однобуквенных значение
+  VTwoLetter(convertToChar, iTextLength(str) * 2); //обработка двухбуквенных значение
+  printSingleLetter(); // вывод частота повторения однобуквенного значения
+  printTwoLetter(); //выыод частоту повторение двухбуквенных значение
+
+  OpenInformationFile.close();
+  // 	system("pause");
   return 0;
 }
-
